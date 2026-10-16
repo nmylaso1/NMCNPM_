@@ -1,0 +1,267 @@
+/* Chỉ đặt overflow ở html, tuyệt đối KHÔNG đặt ở body để không làm hỏng tính năng sticky (ghim) */
+html {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+/* Shared sticky header for logged-in pages */
+.navbar-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    padding: 0.45rem 1rem 0;
+    background: transparent;
+}
+
+.navbar-sticky::before {
+    content: none;
+}
+
+.navbar-sticky::after {
+    content: none;
+}
+
+.navbar-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1.85rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(234, 88, 12, 0.16);
+    background: linear-gradient(145deg,
+            rgba(255, 252, 248, 0.88) 0%,
+            rgba(255, 255, 255, 0.82) 50%,
+            rgba(255, 247, 237, 0.88) 100%);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 10px 30px rgba(194, 65, 12, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.navbar-row {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.35rem;
+    line-height: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: #ea580c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.navbar-logo {
+    height: 36px;
+    width: 36px;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 2px 6px rgba(234, 88, 12, 0.2));
+}
+
+.navbar-brand span {
+    color: #1c1917;
+}
+
+.navbar-brand:hover {
+    color: #c2410c;
+}
+
+.navbar-items {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    white-space: nowrap;
+}
+
+.navbar-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    position: relative;
+    min-width: 5.8rem;
+    justify-content: center;
+    padding: 0.34rem 0.9rem 0.58rem;
+    border: 0;
+    background: transparent;
+    color: #57534e;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.012em;
+    line-height: 1.25rem;
+    border-radius: 9999px;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar-item::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.14rem;
+    height: 2.5px;
+    border-radius: 99px;
+    background: transparent;
+    transform: scaleX(0.25);
+    transform-origin: 50% 50%;
+    opacity: 0;
+    transition: background-color 0.24s ease, transform 0.24s ease, opacity 0.24s ease;
+}
+
+.navbar-item:hover {
+    color: #ea580c;
+}
+
+.navbar-item:hover::after {
+    background: rgba(234, 88, 12, 0.4);
+    transform: scaleX(1);
+    opacity: 1;
+}
+
+.navbar-item-active {
+    color: #ea580c;
+}
+
+.navbar-item-active::after {
+    background: linear-gradient(90deg, #f97316, #ea580c);
+    transform: scaleX(1);
+    opacity: 1;
+}
+
+.navbar-item-active:hover {
+    color: #c2410c;
+}
+
+.navbar-item-active:hover::after {
+    background: #c2410c;
+}
+
+.navbar-item i {
+    opacity: 0.9;
+    width: 0.98rem;
+    height: 0.98rem;
+}
+
+.navbar-item:hover i,
+.navbar-item-active i {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .navbar-sticky {
+        padding: 0.35rem 0.25rem 0;
+    }
+
+    .navbar-inner {
+        padding: 0 0.5rem;
+        overflow: visible;
+    }
+
+    .navbar-inner::-webkit-scrollbar {
+        display: none;
+    }
+
+    .navbar-row {
+        min-height: 60px;
+        gap: 0;
+        min-width: unset;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+
+    .navbar-brand {
+        flex-shrink: 0;
+        margin-right: 0.2rem;
+    }
+
+    /* Ẩn chữ bên cạnh logo để luôn vừa màn hình */
+    .navbar-brand>div {
+        display: none !important;
+    }
+
+    .navbar-items {
+        gap: 0;
+        width: 100%;
+        max-width: none;
+        flex-shrink: 1;
+        justify-content: flex-end;
+    }
+
+    .navbar-item {
+        min-width: unset;
+        width: auto !important;
+        padding: 0.3rem 0.2rem !important;
+        font-size: 0.65rem;
+        flex-direction: column;
+        flex: 1;
+        gap: 2px;
+    }
+
+    .navbar-item i {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+
+    .navbar-item::after {
+        bottom: 0px;
+    }
+
+    /* Chỉnh vị trí badge giỏ hàng */
+    .navbar-item #cart-count-badge {
+        top: -2px !important;
+        right: 50% !important;
+        margin-right: -14px !important;
+    }
+
+    /* Ghi đè CSS cho mục Admin để hài hoà với menu dọc */
+    .navbar-item[href*="src/admin"] {
+        background: transparent !important;
+        color: #7b5530 !important;
+    }
+
+    .navbar-item[href*="src/admin"]:hover,
+    .navbar-item[href*="src/admin"].navbar-item-active {
+        color: #d97706 !important;
+    }
+}
+
+/* Smooth page transition for navbar navigation */
+body.page-transition-enabled {
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+
+body.page-transition-enabled.page-ready {
+    opacity: 1;
+}
+
+body.page-transition-enabled.page-leaving {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.page-transition-enabled {
+        transition: none;
+        opacity: 1;
+    }
+
+    body.page-transition-enabled.page-leaving {
+        opacity: 1;
+    }
+}

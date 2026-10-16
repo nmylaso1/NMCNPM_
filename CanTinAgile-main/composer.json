@@ -1,0 +1,6 @@
+{
+    "require": {
+        "payos/payos": "2.0.0",
+        "guzzlehttp/guzzle": "^7.9"
+    }
+}
