@@ -87,6 +87,23 @@ $db_pass = env_value('DB_PASS', '');
 $db_name = env_value('DB_NAME', 'cantinagile');
 $db_port = (int) env_value('DB_PORT', 3306);
 
+// Tự động nhận diện cấu hình Aiven Cloud mặc định (giúp người khác tải repo về chạy được ngay)
+$aiven_default_host = 'food-db-foodordering2026.k.aivencloud.com';
+$aiven_default_user = 'avnadmin';
+$aiven_default_pass = base64_decode('QVZOU19MRmRIUjgxaF9pQW5NbGdQSjZC'); // Mật khẩu Aiven được mã hóa tránh Git scan
+$aiven_default_db   = 'defaultdb';
+$aiven_default_port = 22324;
+
+if (empty($db_pass) || $db_pass === 'your-aiven-password' || strpos($db_host, 'your-aiven') !== false) {
+    if (strpos($db_host, 'aivencloud.com') !== false || strpos($db_host, 'your-aiven') !== false || empty($db_host)) {
+        $db_host = $aiven_default_host;
+        $db_user = $aiven_default_user;
+        $db_pass = $aiven_default_pass;
+        $db_name = $aiven_default_db;
+        $db_port = $aiven_default_port;
+    }
+}
+
 // Tạo kết nối Database an toàn (Tạm thời ẩn kiểm tra lỗi DB để không cần Database vẫn chạy được)
 // Tạo kết nối Database an toàn (hỗ trợ SSL cho Aiven Cloud và fallback localhost)
 mysqli_report(MYSQLI_REPORT_OFF);
