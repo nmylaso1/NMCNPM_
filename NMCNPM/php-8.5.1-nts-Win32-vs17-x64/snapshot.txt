@@ -1,8 +1,0 @@
-This snapshot was automatically generated on
-Wed, 17 Dec 2025 10:59:45 +0000
-
-Version: 8.5.1
-Branch: HEAD
-Build: D:\a\php-ftw\php-ftw\php\vs16\x64\obj\Release
-
-Built-in Extensions
