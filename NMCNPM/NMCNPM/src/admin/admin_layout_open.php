@@ -20,7 +20,6 @@ $nav_items = [
     'index'       => ['icon' => 'layout-dashboard', 'label' => 'Tổng quan',          'href' => $base . 'src/admin/index.php'],
     'foods'       => ['icon' => 'utensils',          'label' => 'Món ăn',             'href' => $base . 'src/admin/manage_foods.php'],
     'categories'  => ['icon' => 'tags',              'label' => 'Danh mục',           'href' => $base . 'src/admin/manage_categories.php'],
-    'daily_menu'  => ['icon' => 'calendar-days',     'label' => 'Thực đơn ngày',      'href' => $base . 'src/admin/manage_daily_menu.php'],
     'orders'      => ['icon' => 'shopping-bag',      'label' => 'Đơn hàng',           'href' => $base . 'src/admin/manage_orders.php'],
     'reservations'=> ['icon' => 'calendar-check',    'label' => 'Đặt bàn & Phục vụ',  'href' => $base . 'src/admin/manage_reservations.php'],
     'coupons'     => ['icon' => 'ticket',            'label' => 'Mã giảm giá',        'href' => $base . 'src/admin/manage_coupons.php'],

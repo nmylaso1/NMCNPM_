@@ -26,14 +26,14 @@ $products = [];
 $sql = "SELECT id as dish_id, title as name, price, image, description FROM products WHERE is_hidden = 0";
 $result = $conn->query($sql);
 if ($result && $result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $row['score'] = 0;
         $row['reasons'] = [];
         $products[$row['dish_id']] = $row;
     }
 }
 
-if(empty($products)) {
+if (empty($products)) {
     $response['message'] = "Không có sản phẩm nào trong DB.";
     echo json_encode($response);
     exit;
@@ -46,7 +46,7 @@ if ($checkOrderItems && $checkOrderItems->num_rows > 0) {
     $trend_sql = "SELECT product_id, COUNT(product_id) as total_sold FROM order_items GROUP BY product_id ORDER BY total_sold DESC LIMIT 5";
     $trend_res = $conn->query($trend_sql);
     if ($trend_res && $trend_res->num_rows > 0) {
-        while($row = $trend_res->fetch_assoc()) {
+        while ($row = $trend_res->fetch_assoc()) {
             $top_sellers[] = $row['product_id'];
         }
     }
@@ -62,60 +62,47 @@ if ($user_id > 0 && $checkOrderItems && $checkOrderItems->num_rows > 0) {
                  GROUP BY product_id";
     $hist_res = $conn->query($hist_sql);
     if ($hist_res && $hist_res->num_rows > 0) {
-        while($row = $hist_res->fetch_assoc()) {
+        while ($row = $hist_res->fetch_assoc()) {
             $history[$row['product_id']] = $row['times_bought'];
         }
     }
 }
 
-// 3. TÍNH ĐIỂM THỜI ĐIỂM (Time-based & Daily Menu)
+// 3. TÍNH ĐIỂM THỜI ĐIỂM (Time-based Meal Recommendation)
 $hour = intval(explode(':', $time)[0]);
 $current_meal = 'Trưa'; // Default
-if ($hour >= 5 && $hour <= 10) $current_meal = 'Sáng';
-if ($hour >= 11 && $hour <= 14) $current_meal = 'Trưa';
-if ($hour >= 15 && $hour <= 22) $current_meal = 'Tối';
-
-$daily_menu_items = [];
-$menu_sql = "SELECT product_id FROM daily_menu WHERE serving_date = CURDATE() AND meal_type = '$current_meal'";
-$menu_res = $conn->query($menu_sql);
-if ($menu_res && $menu_res->num_rows > 0) {
-    while($row = $menu_res->fetch_assoc()) {
-        $daily_menu_items[] = $row['product_id'];
-    }
-}
+if ($hour >= 5 && $hour <= 10)
+    $current_meal = 'Sáng';
+if ($hour >= 11 && $hour <= 14)
+    $current_meal = 'Trưa';
+if ($hour >= 15 && $hour <= 22)
+    $current_meal = 'Tối';
 
 // CHẤM ĐIỂM TỪNG MÓN
 foreach ($products as $id => &$p) {
     $title = $p['name'];
-    
+
     // Áp dụng Rule 1: Lịch sử mua (+30đ cho mỗi lần mua)
     if (isset($history[$id])) {
         $p['score'] += ($history[$id] * 30);
         $p['reasons'][] = "Món quen thuộc bạn hay đặt gần đây";
     }
-    
+
     // Áp dụng Rule 5: Xu hướng (+20đ)
     if (in_array($id, $top_sellers)) {
         $p['score'] += 20;
         $p['reasons'][] = "Món Best-seller đang bán cực chạy";
     }
-    
-    // Áp dụng Rule 3: Thời điểm / Daily Menu (+25đ)
-    if (in_array($id, $daily_menu_items)) {
+
+    // Áp dụng Rule 3: Gợi ý theo khung giờ / bữa ăn (+25đ)
+    if ($current_meal == 'Sáng' && (stripos($title, 'bún') !== false || stripos($title, 'phở') !== false || stripos($title, 'bánh') !== false || stripos($title, 'trứng') !== false || stripos($title, 'cà phê') !== false || stripos($title, 'cháo') !== false)) {
         $p['score'] += 25;
-        $p['reasons'][] = "Nằm trong thực đơn nổi bật buổi $current_meal";
-    } else {
-        // Fallback theo tên món
-        if ($current_meal == 'Sáng' && (stripos($title, 'bún') !== false || stripos($title, 'phở') !== false || stripos($title, 'bánh') !== false || stripos($title, 'trứng') !== false)) {
-            $p['score'] += 15;
-            $p['reasons'][] = "Gợi ý chuẩn bài cho bữa Sáng nhẹ nhàng";
-        }
-        if (($current_meal == 'Trưa' || $current_meal == 'Tối') && stripos($title, 'cơm') !== false) {
-            $p['score'] += 15;
-            $p['reasons'][] = "Bữa $current_meal cần ăn cơm cho chắc bụng";
-        }
+        $p['reasons'][] = "Gợi ý chuẩn vị cho bữa Sáng khởi đầu ngày mới";
+    } elseif (($current_meal == 'Trưa' || $current_meal == 'Tối') && (stripos($title, 'cơm') !== false || stripos($title, 'bò') !== false || stripos($title, 'gà') !== false || stripos($title, 'lẩu') !== false || stripos($title, 'nướng') !== false)) {
+        $p['score'] += 25;
+        $p['reasons'][] = "Lựa chọn tuyệt vời cho bữa $current_meal";
     }
-    
+
     // Áp dụng Rule 6: Chi tiêu (Budget)
     if ($budget > 0) {
         if ($p['price'] <= $budget) {
@@ -126,10 +113,10 @@ foreach ($products as $id => &$p) {
             $p['score'] -= 100;
         }
     }
-    
+
     // Random nhẹ (+ 0-5đ random) để menu linh động
     $p['score'] += rand(0, 5);
-    
+
     // Chọn lý do hiển thị
     if (empty($p['reasons'])) {
         $p['reason'] = "Món ăn đặc sắc bạn có thể sẽ thích hôm nay!";
@@ -140,13 +127,13 @@ foreach ($products as $id => &$p) {
 
 // Lọc CỨNG món vượt ngân sách (không xuất hiện dù điểm cao)
 if ($budget > 0) {
-    $products = array_filter($products, function($p) use ($budget) {
-        return (float)$p['price'] <= $budget;
+    $products = array_filter($products, function ($p) use ($budget) {
+        return (float) $p['price'] <= $budget;
     });
 }
 
 // Sắp xếp giảm dần theo điểm
-usort($products, function($a, $b) {
+usort($products, function ($a, $b) {
     return $b['score'] <=> $a['score'];
 });
 

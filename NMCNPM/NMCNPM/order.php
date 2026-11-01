@@ -32,26 +32,12 @@ syncSessionCartFromDb($conn, (int) $user_id);
 if (!isset($_SESSION['cart_suggestions']) || empty($_SESSION['cart_suggestions'])) {
     $suggestions = [];
     if (isset($conn)) {
-        $sqlSuggest = "
-            SELECT p.id, p.title, p.price, p.image, p.description, dm.is_highlight
-            FROM daily_menu dm
-            JOIN products p ON p.id = dm.product_id
-            WHERE dm.serving_date = CURDATE()
-            ORDER BY RAND() LIMIT 4
-        ";
+        // Lấy ngẫu nhiên 4 món đang hoạt động từ bảng products
+        $sqlSuggest = "SELECT id, title, price, image, description, 0 as is_highlight FROM products WHERE is_hidden = 0 ORDER BY RAND() LIMIT 4";
         $suggestRes = $conn->query($sqlSuggest);
-        if ($suggestRes && $suggestRes->num_rows > 0) {
+        if ($suggestRes) {
             while ($row = $suggestRes->fetch_assoc()) {
                 $suggestions[] = $row;
-            }
-        } else {
-            // Nếu không có thực đơn hôm nay, lấy ngẫu nhiên 4 món từ bảng products
-            $sqlSuggest = "SELECT id, title, price, image, description, 0 as is_highlight FROM products ORDER BY RAND() LIMIT 4";
-            $suggestRes = $conn->query($sqlSuggest);
-            if ($suggestRes) {
-                while ($row = $suggestRes->fetch_assoc()) {
-                    $suggestions[] = $row;
-                }
             }
         }
         $_SESSION['cart_suggestions'] = $suggestions;
