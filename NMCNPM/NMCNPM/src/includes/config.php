@@ -118,6 +118,43 @@ try {
     $conn = null;
 }
 
+// Nếu không kết nối được database, hiển thị thông báo lỗi thân thiện và dừng lại
+if (!$conn && !defined('ALLOW_NO_DB')) {
+    $isApiRequest = (
+        isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
+        (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) ||
+        (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false)
+    );
+    if ($isApiRequest) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra cấu hình .env']);
+        exit;
+    }
+    http_response_code(503);
+    echo '<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8">
+<title>Lỗi kết nối Database</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0f172a}
+.box{background:#1e293b;color:#e2e8f0;padding:40px;border-radius:16px;max-width:560px;text-align:center}
+h2{color:#f97316;margin-top:0}pre{background:#0f172a;padding:16px;border-radius:8px;text-align:left;font-size:13px;overflow:auto;white-space:pre-wrap}
+b{color:#fbbf24}a{display:inline-block;margin-top:20px;padding:10px 24px;background:#f97316;color:#fff;border-radius:8px;text-decoration:none}
+</style></head><body><div class="box">
+<h2>⚠️ Không thể kết nối cơ sở dữ liệu</h2>
+<p>Server chưa được cấu hình đúng database. Hãy thực hiện các bước sau:</p>
+<pre>1. Mở <b>phpMyAdmin</b> hoặc <b>HeidiSQL</b>
+2. Tạo database mới tên: <b>cantinagile</b>
+3. Import file: <b>database/database.sql</b>
+4. Kiểm tra file <b>.env</b> có đúng thông tin:
+   DB_HOST=127.0.0.1
+   DB_USER=root
+   DB_PASS=(mật khẩu MySQL của bạn)
+   DB_NAME=cantinagile
+   DB_PORT=3306
+5. Khởi động lại server</pre>
+<a href="javascript:location.reload()">↺ Thử lại</a>
+</div></body></html>';
+    exit;
+}
+
 if ($conn && isset($_SESSION['user_id'])) {
     $idle_timeout = 10 * 60; // 10 phút 
     $current_time = time();

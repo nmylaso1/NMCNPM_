@@ -66,7 +66,7 @@ if ($activeCategory > 0) {
     $where .= " AND p.category_id = " . (int)$activeCategory;
 }
 if (!empty($searchQuery)) {
-    $safeSearch = $conn->real_escape_string($searchQuery);
+    $safeSearch = $conn ? $conn->real_escape_string($searchQuery) : addslashes($searchQuery);
     $where .= " AND (p.title LIKE '%$safeSearch%' OR p.description LIKE '%$safeSearch%')";
 }
 
@@ -75,7 +75,7 @@ if ($sortBy === 'price_low') $orderBy = "p.price ASC";
 if ($sortBy === 'price_high') $orderBy = "p.price DESC";
 
 $sqlProducts = "SELECT p.*, cp.name AS category_name FROM products p LEFT JOIN categories_products cp ON cp.id = p.category_id $where ORDER BY $orderBy";
-$productsRes = $conn->query($sqlProducts);
+$productsRes = $conn ? $conn->query($sqlProducts) : null;
 
 
 ?>
